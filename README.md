@@ -190,7 +190,7 @@ poster_sigma2<-function(neta.a,neta.b,residuos){
 ```
 
 
-#### Function for sample fro posterior distribution of parameter $\alpha$.
+#### Function for sample fro posterior distribution of parameter alpha.
 
 ```{r}
 gera_eta_alpha<-function(alpha,a_alph_prior,b_alph_prior,K,m){
