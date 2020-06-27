@@ -1,3 +1,9 @@
+
+<script src="/math-code.js"></script> 
+<script async 
+src="//mathjax.rstudio.com/latest/MathJax.js?config=TeX-MML-AM_CHTML"> 
+</script>
+
 # Clustering ultrasonic waves propagation time a hierarchical polynomial semi-parametric approach
 
 
