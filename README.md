@@ -1,11 +1,12 @@
 # Clustering ultrasonic waves propagation time a hierarchical polynomial semi-parametric approach
 
-In this work, a data-driven hierarchical regression model is applied to simulated data set. 
 
 
 
 
 ## __Script for analysis from simulated data set.__
+
+In this work, a data-driven hierarchical regression model is applied to simulated data set. 
 
 
 
