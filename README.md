@@ -1,5 +1,6 @@
-# Clustering-ultrasonic-waves-propagation-time-a-hierarchical-polynomial-semi-parametric-approach
-Non-destructive evaluation refers to the evaluation and inspection process of materials for characterization or finding defects and flaws in comparison with some pattern, without harming the object being evaluated. In this sense, ultrasonic monitoring is one of the most important tools for detecting local defects. Specifically, on masonry walls this method consists of measuring the time it takes a mechanical wave to pass through a material, detecting changes in its propagation and identifying the presence of flaws, cracks and damages. Despite statistical methods being widely used for processing collection of large data sets, some issues need to be overcoming for a better understanding on waves behaviour, as for instance the analysis of the path traveled by the ultrasonic wave. Thus, this work is focused on studying the behaviour of wave propagation through a statistical model under a new approach. Using a Bayesian semi-parametric method with Dirichlet process, a data-driven hierarchical regression model is applied to simulated and experimental data sets. For simulated data set, we observe the sensibility of the model in clustering observed profiles in an unknown number of groups and also detecting outliers. The application to experimental data shows potential use of the model {\it in situ} due to its efficiency in identifying different behaviours of wave propagation in materials. Therefore, considering the advanced of automation and internet of things, statistical methods based on clustering are very important and useful tools for being explored in the masonry conditions monitoring.
+# Clustering ultrasonic waves propagation time a hierarchical polynomial semi-parametric approach
+
+In this work, a data-driven hierarchical regression model is applied to simulated data set. 
 
 
 
@@ -294,8 +295,10 @@ for (int in 1:AmostrasTotal){
 		prob<-numeric(K)
 		for (k in 1:K){
 			nk[k]<-sum(S_vig[-i]==k)
-			prob[k]<-nk[k]*dmvnorm(Y[which(indiv==i),],mean=c(matrix(X[which(indiv==i),],ncol=ncol(X))%*%matrix(gama_vig,ncol=1)+Z[which(indiv==i),]%*%matrix(b_vig[,k],ncol=1)),sigma=diag(sigma2_vig,repl[i]))}
-		prob<-c(prob,alpha_vig*dmvnorm(Y[which(indiv==i),],mean=c(matrix(X[which(indiv==i),],ncol=ncol(X))%*%matrix(gama_vig,ncol=1)+Z[which(indiv==i),]%*%beta_vig),sigma=(Z[which(indiv==i),]%*%Dmat%*%t(Z[which(indiv==i),])+diag(sigma2_vig,repl[i]))))
+			prob[k]<-nk[k]*dmvnorm(Y[which(indiv==i),],mean=c(matrix(X[which(indiv==i),],ncol=ncol(X))%*%matrix(gama_vig,ncol=1)+Z[which(indiv==i),]%*%
+			matrix(b_vig[,k],ncol=1)),sigma=diag(sigma2_vig,repl[i]))}
+		prob<-c(prob,alpha_vig*dmvnorm(Y[which(indiv==i),],mean=c(matrix(X[which(indiv==i),],ncol=ncol(X))%*%
+		matrix(gama_vig,ncol=1)+Z[which(indiv==i),]%*%beta_vig),sigma=(Z[which(indiv==i),]%*%Dmat%*%t(Z[which(indiv==i),])+diag(sigma2_vig,repl[i]))))
 		S_old<-S_vig[i]
 		S_vig[i]<-rDiscreta(prob/sum(prob))
 		if (S_vig[i]!=S_old){
@@ -345,7 +348,8 @@ for (int in 1:AmostrasTotal){
 	for (k in 1:K){
 		Bk<-Z[which(S_obs_vig==k),]
 		aux<-solve((t(Bk)%*%Bk)+(solve(Dmat)*sigma2_vig))
-		media<-aux%*%((t(Bk)%*%(Y[which(S_obs_vig==k),]-matrix(X[which(S_obs_vig==k),],ncol=ncol(X))%*%matrix(gama_vig,ncol=1)))+(sigma2_vig*solve(Dmat)%*%beta_vig))
+		media<-aux%*%((t(Bk)%*%(Y[which(S_obs_vig==k),]-matrix(X[which(S_obs_vig==k),],ncol=ncol(X))%*%matrix(gama_vig,ncol=1)))+
+		(sigma2_vig*solve(Dmat)%*%beta_vig))
 		varcov<-aux*sigma2_vig
 		b_vig[,k]<-t(rmvnorm(1, mean = c(media), sigma = varcov, method=c("chol"), pre0.9_9994 = TRUE))}		
 	#
@@ -366,7 +370,8 @@ for (int in 1:AmostrasTotal){
 	#	
 	if (int>burnin & int%%saltos==0){
 		log_vero<-0
-		for (i in 1:m) log_vero<-log_vero+dmvnorm(Y[which(indiv==i),],mean=c(matrix(X[which(indiv==i),],ncol=ncol(X))%*%matrix(gama_vig,ncol=1)+Z[which(indiv==i),]%*%matrix(b_vig[,S_vig[i]],ncol=1)),sigma=diag(sigma2_vig,repl[i]),log=TRUE)
+		for (i in 1:m) log_vero<-log_vero+dmvnorm(Y[which(indiv==i),],mean=c(matrix(X[which(indiv==i),],ncol=ncol(X))%*%matrix(gama_vig,ncol=1)+
+		Z[which(indiv==i),]%*%matrix(b_vig[,S_vig[i]],ncol=1)),sigma=diag(sigma2_vig,repl[i]),log=TRUE)
 #
 
 b.list<-list(c(b_vig))
@@ -553,7 +558,7 @@ Tab[j,Se[i]]=Tab[j,Se[i]]+1
 
 for(i in 1:nrow(Tab)){Tab[i,]=Tab[i,]/sum(Tab[i,])}
 
-Tab[,1:4]
+Tab
 ```
 
 
