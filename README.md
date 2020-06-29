@@ -11,9 +11,9 @@ In this work, a data-driven hierarchical regression model is applied to simulate
 #### __Script for analysis from simulated and experimental data set can be also seen in RStudio connect by the links:__
 
 
-[Analysis of experimental data set](https://beta.rstudioconnect.com/content/11709)
+[Analysis of experimental data set on RStudio connect](https://beta.rstudioconnect.com/content/11709) 
 
-[Analysis of contamined simulated data set](https://beta.rstudioconnect.com/content/11708)
+[Analysis of contamined simulated data set on RStudio connect](https://beta.rstudioconnect.com/content/11708)
 
 
 This work is the result of a partnership between the Federal University of Ceará and the Federal University of São Calos,  Brazil, which experiment was realizaded at the Laboratory of the Reabilitation and Durability of Constructions (LAREB),  <https://lareb.ufc.br/>.
