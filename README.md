@@ -15,6 +15,7 @@ https://beta.rstudioconnect.com/content/11708
 
 https://beta.rstudioconnect.com/content/11709
 
+[link](https://beta.rstudioconnect.com/content/11709)
 
 
 This work is the result of a partnership between the Federal University of Ceará and the Federal University of São Calos,  Brazil, which experiment was realizaded at the Laboratory of the Reabilitation and Durability of Constructions (LAREB),  <https://lareb.ufc.br/>.
