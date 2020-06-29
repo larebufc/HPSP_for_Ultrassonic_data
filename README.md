@@ -11,3 +11,6 @@ In this work, a data-driven hierarchical regression model is applied to simulate
 #### __Script for analysis from simulated and experimental data set can be also seen in RStudio connect by the links:__
 
 
+https://beta.rstudioconnect.com/content/11708
+
+https://beta.rstudioconnect.com/content/11709
