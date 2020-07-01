@@ -1,0 +1,382 @@
+
+---
+title: 'Clustering ultrasonic waves propagation time: a hierarchical polynomial semi-parametric approach'
+Autor: 'Daiane Aparecida Zuanetti, Rosineide da Paz,  Talisson Rodrigues  and Esequiel Mesquita'
+output:
+  html_document:
+    df_print: paged
+---
+
+This work is the result of a partnership between the Federal University of Ceará and the Federal University of São Calos,  Brazil, which experiment was carried out at the Laboratory of the Reabilitation and Durability of Constructions (LAREB),  <https://lareb.ufc.br/>.
+
+
+Autors: Daiane Aparecida Zuanetti, Rosineide da Paz,  Talisson Rodrigues  and Esequiel Mesquita.
+
+
+
+
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+## __Analysis of experimental data set.__
+
+In this study, a data-driven hierarchical regression model is applied to an experimental data set. 
+
+
+#### R packages required.
+
+```{r echo=TRUE, paged.print=TRUE}
+if(!require(mvtnorm)) install.packages("mvtnorm");require(mvtnorm) 
+if(!require(MCMCpack)) install.packages("MCMCpack");require(MCMCpack) 
+if(!require(compiler)) install.packages("compiler");require(compiler) 
+if(!require(RCurl)) install.packages("RCurl");require(RCurl) 
+```
+
+
+#### Donloading data from github.
+
+```{r}
+
+link <-"https://raw.githubusercontent.com/larebufc/Clustering-ultrasonic-waves-propagation-time-a-hierarchical-polynomial-semi-parametric-approach/master/dados_com_e_sem_vazios.csv"
+dados<-read.csv(link)
+
+tira<-which(dados[,4]==0 & dados[,5]==0)
+dados<-dados[-tira,]
+indiv<-as.numeric(dados[,2])
+#
+#
+m=length(table(indiv))    # Total of individual 
+repl=table(indiv)     # Number of replication in each individual
+n=length(indiv)   # Total of observations
+head(dados)
+```
+
+
+###### Design matrices and response vector
+
+```{r}
+
+Vt<-c(10,15,20,25,30,35)
+aux=matrix(round(poly(Vt, degree=3),3),ncol=3)
+aux<-cbind(1,aux)
+Z<-NULL
+for (i in 1:m) Z<-rbind(Z,aux[1:repl[i],])
+Y<-as.matrix(dados[,4],ncol=1)
+X<-NULL #- this model does not consider fixed effects
+
+p<-pcov<-ncol(X)  # Total  of fixed effects
+q<-pran<-ncol(Z)  # Total of random effects
+
+ head(Z); head(Y)
+```
+
+
+
+
+###### Function for sampling discrete values.
+
+```{r}
+rDiscreta<-function(p){
+ u<-runif(1)
+ P<-cumsum(p)
+ val<-sum(P<u)+1
+ val}
+```
+
+#### Function for sampling from the posterior of parameter $\sigma^2$.
+
+```{r}
+poster_sigma2<-function(neta.a,neta.b,residuos){
+ alpha<-(length(residuos)/2)+neta.a
+ beta<-(sum(residuos^2)/2)+neta.b
+ sigma2<-1/(rgamma(1,alpha,beta))
+ return(sigma2)}
+```
+
+
+#### Function for sampling fro posterior distribution of parameter $\alpha$.
+
+```{r}
+gera_eta_alpha<-function(alpha,a_alph_prior,b_alph_prior,K,m){
+	eta_aux<-rbeta(1,alpha+1,m)
+	aux_prob<-(a_alph_prior+K-1)/(m*(b_alph_prior-log(eta_aux)))
+	prob_alpha<-aux_prob/(1+aux_prob)
+	unif<-runif(1)
+	if (unif<=prob_alpha) alpha<-rgamma(1,a_alph_prior+K,b_alph_prior-log(eta_aux)) else alpha<-rgamma(1,a_alph_prior+K-1,b_alph_prior-log(eta_aux))
+	return(alpha)}
+```
+
+##### Hyperparameters of the model.
+
+```{r}
+lambda1<-lambda2<-0.01
+qcov<-ncol(Z)
+ni<-4 # degree of freedom of inverse-wishart
+sigma<-diag(100,ncol=ncol(Z),nrow=ncol(Z)) #  variable and explained variable of inverse-wishart
+for (i in 1:ncol(Z)){
+	for (j in 1:ncol(Z)) if (sigma[i,j] != 100) sigma[i,j]<-0.5}
+
+a_alph_prior<-b_alph_prior<-1
+```
+
+
+#### Initial values for  the MCMC chain.
+
+```{r}
+set.seed(100)
+S_vig<-rep(1,m)
+S_obs_vig<-NULL
+for (i in 1:m) S_obs_vig<-c(S_obs_vig,rep(S_vig[i],repl[i]))
+K<-length(table(S_vig))
+sigma2_vig<-round(poster_sigma2(lambda1,lambda2,c(Y)),3)
+beta_vig<-matrix(0,ncol=1,nrow=qcov)
+Dmat<-riwish(ni,sigma)
+b_vig<-matrix(0,ncol=K,nrow=qcov)
+for (k in 1:K){
+	Bk<-Z[which(S_obs_vig==k),]
+	aux<-solve((t(Bk)%*%Bk)+(solve(Dmat)*sigma2_vig))
+	media<-aux%*%((t(Bk)%*%Y[which(S_obs_vig==k),])+(sigma2_vig*solve(Dmat)%*%beta_vig))
+	varcov<-aux*sigma2_vig
+	b_vig[,k]<-t(rmvnorm(1, mean = c(media), sigma = varcov, method=c("chol"), pre0.9_9994 = TRUE))}
+alpha_vig<-gera_eta_alpha(1,a_alph_prior,b_alph_prior,K,m)
+```
+
+
+
+#### Definitions for MCMC convergency.
+
+```{r}
+burnin<-100         ## burnig
+amostrasfin<-1000    ## sample used for inference without jump
+saltos<-1            ## jump definition    
+sem<-1000            ## been for simulation
+```
+
+
+#### MCMC runing.
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+sem=1000
+est.param <- list(sigma2=NULL, 
+                  bs=list(),
+                  Sj=NULL, 
+                  K=NULL, 
+                  alpha=NULL, 
+                  Betas=NULL, 
+                  matrix_D=NULL,
+                  log_vero=NULL)
+K=1
+AmostrasTotal<-burnin+amostrasfin*saltos
+set.seed(sem)
+library(compiler)
+enableJIT(3)
+#
+for (int in 1:AmostrasTotal){
+	#
+	######## update S
+	#
+	for (i in 1:m){
+		nk<-numeric(K)
+		prob<-numeric(K)
+		for (k in 1:K){
+			nk[k]<-sum(S_vig[-i]==k)
+			prob[k]<-nk[k]*dmvnorm(Y[which(indiv==i),],mean=c(Z[which(indiv==i),]%*%matrix(b_vig[,k],ncol=1)),sigma=diag(sigma2_vig,repl[i]))}
+		prob<-c(prob,alpha_vig*dmvnorm(Y[which(indiv==i),],mean=c(Z[which(indiv==i),]%*%beta_vig),sigma=(Z[which(indiv==i),]%*%Dmat%*%t(Z[which(indiv==i),])+diag(sigma2_vig,repl[i]))))
+		S_old<-S_vig[i]
+		S_vig[i]<-rDiscreta(prob/sum(prob))
+		if (S_vig[i]!=S_old){
+			S_obs_vig[which(indiv==i)]<-S_vig[i]
+			b_vig_teste<-matrix(0,nrow=qcov,ncol=max(K,max(S_vig)))
+			b_vig_teste[,1:ncol(b_vig)]<-b_vig
+			b_vig<-b_vig_teste
+			for (k in 1:max(K,max(S_vig))){
+				if (length(which(S_obs_vig==k))>0){
+					Bk<-Z[which(S_obs_vig==k),]
+					aux<-solve((t(Bk)%*%Bk)+(solve(Dmat)*sigma2_vig))
+					media<-aux%*%((t(Bk)%*%Y[which(S_obs_vig==k),])+(sigma2_vig*solve(Dmat)%*%beta_vig))
+					varcov<-aux*sigma2_vig
+					b_vig[,k]<-t(rmvnorm(1, mean = c(media), sigma = varcov, method=c("chol"), pre0.9_9994 = TRUE))}}}
+		while (length(table(S_vig))<max(S_vig)){ # exclude empty clusters
+			categr<-as.numeric(as.character(data.frame(table(S_vig))[,1]))
+			categd<-seq(1:length(table(S_vig)))
+			dif<-which(categr!=categd)
+			S_vig[which(S_vig>dif[1])]<-S_vig[which(S_vig>dif[1])]-1
+			b_vig<-matrix(c(b_vig[,-dif[1]]),nrow=qcov)
+			K<-ncol(b_vig)
+			S_obs_vig<-NULL
+			for (ret in 1:m) S_obs_vig<-c(S_obs_vig,rep(S_vig[ret],repl[ret]))}	
+		if (length(table(S_vig))<K){
+			b_vig<-matrix(c(b_vig[,-K]),nrow=qcov)
+			K<-ncol(b_vig)}
+		K<-length(table(S_vig))}		
+	#
+	###### update matrix D
+	#
+	Spost<-matrix(0,ncol=ncol(sigma),nrow=nrow(sigma))
+	for (k in 1:K) Spost<-((matrix(b_vig[,k],ncol=1)-beta_vig)%*%t(b_vig[,k]-beta_vig))*sum(S_vig==k)+Spost
+	Dmat<-riwish(ni+m,sigma+Spost)
+	#
+    ###### ordena os grupos do maior para o menor
+    #
+    ord=as.numeric(names(sort(table(S_vig),decreasing = TRUE)))
+  	Ss=S_vig
+  	Ss_obs<-S_obs_vig
+  	for(l in 1:length(ord)){
+  		S_vig[Ss==ord[l]]=l
+  		S_obs_vig[Ss_obs==ord[l]]=l}
+	b_vig<-matrix(b_vig[,ord],ncol=ncol(b_vig))
+    #
+	###### update random effects
+	#
+	for (k in 1:K){
+		Bk<-Z[which(S_obs_vig==k),]
+		aux<-solve((t(Bk)%*%Bk)+(solve(Dmat)*sigma2_vig))
+		media<-aux%*%((t(Bk)%*%Y[which(S_obs_vig==k),])+(sigma2_vig*solve(Dmat)%*%beta_vig))
+		varcov<-aux*sigma2_vig
+		b_vig[,k]<-t(rmvnorm(1, mean = c(media), sigma = varcov, method=c("chol"), pre0.9_9994 = TRUE))}		
+	#
+	###### update variance and alpha
+	#
+	ran_pred<-NULL
+	for (i in 1:n) ran_pred[i]<-Z[i,]%*%matrix(b_vig[,S_obs_vig[i]],ncol=1)
+	media_beta<-matrix(0,ncol=1,nrow=nrow(b_vig))
+	for (k in 1:K) media_beta<-media_beta+(sum(S_vig==k)*b_vig[,k])
+	beta_vig<-t(rmvnorm(1, mean = c(media_beta/m), sigma = Dmat/m, pre0.9_9994 = TRUE))
+	residuos<-Y-ran_pred
+	sigma2_vig<-round(poster_sigma2(lambda1,lambda2,c(residuos)),7)
+	alpha_vig<-gera_eta_alpha(1,a_alph_prior,b_alph_prior,K,m)
+	#
+	#### recording results
+	#	
+	if (int>burnin & int%%saltos==0){
+		log_vero<-0
+		for (i in 1:m) log_vero<-log_vero+dmvnorm(Y[which(indiv==i),],mean=c(Z[which(indiv==i),]%*%matrix(b_vig[,S_vig[i]],ncol=1)),sigma=diag(sigma2_vig,repl[i]),log=TRUE)
+b.list<-list(c(b_vig))
+b.sample<-est.param[["bs"]]
+est.param[["bs"]] <- c(b.sample,b.list)
+
+est.param[["Sj"]]=rbind(est.param[["Sj"]],  S_vig)
+est.param[["K"]]=rbind(est.param[["K"]],  K)
+est.param[["sigma2"]]=rbind(est.param[["sigma2"]],  sigma2_vig)
+est.param[["alpha"]]=rbind(est.param[["alpha"]],  alpha_vig)
+est.param[["Betas"]]=rbind(est.param[["Betas"]],  beta_vig)
+est.param[["matrix_D"]]=rbind(est.param[["matrix_D"]], round(Dmat,3))
+est.param[["log_vero"]]=rbind(est.param[["log_vero"]],  log_vero) 
+}}
+```
+
+
+
+
+
+
+
+#### Convergency analysis.
+
+```{r}
+log_vero <- est.param$log_vero 
+log_v<-mcmc(log_vero)
+effectiveSize(log_v)
+geweke.diag(log_v)
+```
+
+
+
+
+## Point and interval estimation for parameters of the model and indicator variables.
+
+```{r}
+variancia<-est.param$sigma2 
+alfa<-est.param$alpha 
+alfa<-mcmc(alfa)
+variancia<-mcmc(variancia)
+effectiveSize(alfa)
+geweke.diag(alfa)
+effectiveSize(variancia)
+geweke.diag(variancia)
+#
+plot(alfa,type='l')
+quantile(alfa,c(0.025,0.50,0.975))
+plot(variancia,type='l')
+quantile(variancia,c(0.025,0.50,0.975))
+#
+K<-est.param$K  
+Sj<-est.param$Sj 
+betas<-est.param$Betas  
+baleat<- est.param$bs 
+mat_D<- est.param$matrix_D   
+#
+S<-matrix(Sj,ncol=m,nrow=amostrasfin,byrow=TRUE)
+b_aleat<-matrix(0,nrow=amostrasfin,ncol=(max(K)*q))
+matrizD<-matrix(0,nrow=amostrasfin,ncol=q*q)
+obs<-1
+obs2<-1
+for (i in 1:amostrasfin){
+  if (K[i]>0){
+      b_aleat[i,1:(K[i]*q)]<-baleat[[i]]
+    matrizD[i,]<-mat_D[(q*q*(i-1)+1):(q*q*(i))]}
+  obs<-obs+q
+  obs2<-obs2+(K[i]*q)}
+
+#
+aux<-0
+for (i in 1:q){ #### covariance matrix of G0 distribution
+  for (j in 1:q){
+    aux<-aux+1
+    if (j>=i){
+          print(quantile(matrizD[,aux],c(0.025,0.50,0.975)))}}}
+#
+### final clusters
+#
+Sj.j<-S #matriz de agrupamento a posteriori
+prob.eq<-matrix(0,nrow=ncol(Sj.j),ncol=ncol(Sj.j))
+for (i in 1:ncol(Sj.j)){
+	for (j in 1:ncol(Sj.j)){
+		prob.eq[i,j]<-round(sum(Sj.j[,i]==Sj.j[,j])/length(Sj.j[,i]),5)*100}}
+#
+thresh<-0.50*100
+clust_f<-c(1,rep(0,(ncol(Sj.j)-1)))
+for (i in 2:ncol(Sj.j)){
+#for (i in 310:514){
+	if (max(prob.eq[i,1:(i-1)])>thresh) clust_f[i]<-clust_f[which(prob.eq[i,1:(i-1)]==max(prob.eq[i,1:(i-1)]))[1]] else clust_f[i]<-max(clust_f[1:(i-1)]+1)}
+#
+thesing<-0.3 # merging outliers that appear in the same group at least 30% of MCMC iterations
+singl<-which(clust_f %in% which(table(clust_f)==1))
+prob.eq.sin<-prob.eq[singl,]
+for (i in 1:nrow(prob.eq.sin)){
+	prob.eq.sin[i,singl[i]]<-0
+	if (max(prob.eq.sin[i,])>thesing) clust_f[singl[i]]<-clust_f[which(prob.eq.sin[i,]==max(prob.eq.sin[i,]))[1]]}
+while (length(table(clust_f))<max(clust_f)){ # exclude empty clusters
+	categr<-as.numeric(as.character(data.frame(table(clust_f))[,1]))
+	categd<-seq(1:length(table(clust_f)))
+	dif<-which(categr!=categd)
+	clust_f[which(clust_f>dif[1])]<-clust_f[which(clust_f>dif[1])]-1}
+table(clust_f)
+#
+###### clusters effects estimation
+#
+baleat_f<-matrix(0,nrow=amostrasfin,ncol=length(table(clust_f))*q)
+for (gr in 1:length(table(clust_f))){
+	ind_gr<-which(clust_f==gr)
+	for (it in 1:amostrasfin){
+		grupos<-S[it,ind_gr]
+		for (cov in 1:q){
+			baleat_f[it,((gr-1)*q+cov)]<-mean(b_aleat[it,((grupos-1)*q+cov)])}}}
+#
+#### Interval estimates for the random-effect variables.
+R=Bestk<-baleat_f
+Est=numeric()
+for(i in 1:ncol(R)){
+  vetor=pp<-matrix(R[,i])
+  vetor <- mcmc(vetor)
+  hpd=HPDinterval(vetor,prob=0.95)
+  int=hpd[1:2]
+  est=c(mean(R[,i]),int)
+  Est=rbind(Est,est)
+}
+Est
+```
