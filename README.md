@@ -9,7 +9,7 @@ This work is the result of a partnership between the Federal University of Cear√
 Autors: Daiane Aparecida Zuanetti, Rosineide da Paz,  Talisson Rodrigues  and Esequiel Mesquita.
 
 
-
+<https://beta.rstudioconnect.com/content/14656>
 
 
 
