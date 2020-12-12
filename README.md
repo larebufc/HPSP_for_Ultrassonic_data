@@ -1,7 +1,7 @@
 
 
 
-### Clustering ultrasonic waves propagation time a hierarchical polynomial semi-parametric approach
+### Clustering ultrasonic waves propagation time: a hierarchical polynomial semi-parametric approach
 
 
 
