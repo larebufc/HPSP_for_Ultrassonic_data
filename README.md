@@ -10,7 +10,7 @@ In this material, the scripts for implement the methodology presented in the man
 Autors: Daiane Aparecida Zuanetti, Rosineide da Paz,  Talisson Rodrigues  and Esequiel Mesquita.
 
 
-All experimental data sets are aAll experimental data sets used are attached above.  
+All experimental data sets used are attached above.
 
 Some results and the codes for  analyses with simulated data sets are shown in RStudio Connect in the follow links.
 
