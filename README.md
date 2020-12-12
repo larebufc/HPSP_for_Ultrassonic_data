@@ -18,6 +18,9 @@ Some results and the codes for  analyses with simulated data sets are shown in R
 
 [Sensitivity analysis: Cholesky decomposition for covariance matrix](https://beta.rstudioconnect.com/content/14729)
 
+[Sensitivity analysis: Jeffrey’s prior](https://beta.rstudioconnect.com/content/14660)
+
+
 
 The code for the final model and the main simultated data is shown below.
 
