@@ -2,16 +2,22 @@
 
 
 ### Clustering ultrasonic waves propagation time a hierarchical polynomial semi-parametric approach
-This work is the result of a partnership between the Federal University of Ceará and the Federal University of São Calos,  Brazil, which experiment was carried out at the Laboratory of the Reabilitation and Durability of Constructions (LAREB),  <https://lareb.ufc.br/>.
 
 
+
+In this material, the scripts for implement the methodology presented in the manuscript: Clustering ultrasonic waves propagation time: a hierarchical polynomial semi-parametric approach.  This work is the result of a partnership between the Federal University of Ceará and the Federal University of São Calos,  Brazil. The experiment was carried out at the Laboratory of the Reabilitation and Durability of Constructions (LAREB),  <https://lareb.ufc.br/>, in partnership with the Laboratory of Innovative Technologies (from portuguese LTI) <https://lti.ufc.br/>, both belonging to the Federal University of Ceará.
 
 Autors: Daiane Aparecida Zuanetti, Rosineide da Paz,  Talisson Rodrigues  and Esequiel Mesquita.
 
 
-<https://beta.rstudioconnect.com/content/14656>
 
 
+The results and the code for all realized analyses are shown in RStudio Connect in the follow links.
+
+[Sensitivity analysis: normal distribution prior for parameter](https://beta.rstudioconnect.com/content/14658)
+
+
+The code for the final model for the simultated data is shown below.
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
