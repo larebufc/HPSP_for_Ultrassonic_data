@@ -12,7 +12,7 @@ Autors: Daiane Aparecida Zuanetti, Rosineide da Paz,  Talisson Rodrigues  and Es
 
 
 
-The results and the codes for  analyses with simulated data sets are shown in RStudio Connect in the follow links.
+Some results and the codes for  analyses with simulated data sets are shown in RStudio Connect in the follow links.
 
 [Sensitivity analysis: normal distribution prior for parameter](https://beta.rstudioconnect.com/content/14658)
 
