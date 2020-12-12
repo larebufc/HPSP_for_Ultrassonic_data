@@ -19,9 +19,6 @@ The results and the codes for  analyses with simulated data sets are shown in RS
 
 The code for the final model and the main simultated data is shown below.
 
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
-```
 
 
 ## __Analysis of contamined simulated data set.__
