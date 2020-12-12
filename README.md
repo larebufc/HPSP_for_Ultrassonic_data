@@ -12,12 +12,12 @@ Autors: Daiane Aparecida Zuanetti, Rosineide da Paz,  Talisson Rodrigues  and Es
 
 
 
-The results and the codes for all realized analyses are shown in RStudio Connect in the follow links.
+The results and the codes for  analyses with simulated data sets are shown in RStudio Connect in the follow links.
 
 [Sensitivity analysis: normal distribution prior for parameter](https://beta.rstudioconnect.com/content/14658)
 
 
-The code for the final model for the simultated data is shown below.
+The code for the final model and the main simultated data is shown below.
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
